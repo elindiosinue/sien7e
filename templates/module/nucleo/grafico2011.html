@@ -1,0 +1,109 @@
+{% extends "layouts/module-layout.html" %}
+{% block head %}
+<style>
+div.graf {
+	width: 600px;
+	height: 400px;
+	position: absolute;
+	display: block;
+	right: 0;
+	bottom: 0;
+	background-color: #DEEDF7;
+	text-align: center;
+}
+
+select,input {
+	margin-left: 15px;
+}
+</style>
+<script type="text/javascript">
+	// Set a callback to run when the Google Visualization API is loaded.
+	google.setOnLoadCallback(drawChart);
+
+	// Callback that creates and populates a data table, 
+	// instantiates the pie chart, passes in the data and
+	// draws it.
+	function drawChart() {
+
+		var bip = 10866566 + 7003511 + 1015691 + 324317;
+		var minor = 24666392 - bip;
+		var abs = 11113099;
+		var nulo = 317555;
+		var blanco = 333461;
+		var w = 600;
+		var h = 400;
+
+		// Create the data table.
+		var data = new google.visualization.DataTable();
+		data.addColumn('string', 'Tipo');
+		data.addColumn('number', 'Votos');
+		data.addRows([ [ 'Blancos', blanco ], [ 'Nulos', nulo ],
+				[ 'Bipartidismo', bip ], [ 'Partidos minoritarios', minor ],
+				[ 'Abstensiones', abs ] ]);
+
+		var nobip = minor + abs + blanco + nulo;
+
+		// Create the data table.
+		var data2 = new google.visualization.DataTable();
+		data2.addColumn('string', 'Tipo');
+		data2.addColumn('number', 'Votos');
+		data2.addRows([ [ 'Bipartidismo', bip ],
+				[ 'Contra Bipartidismo', nobip ] ]);
+
+		// Set chart options
+		var options = {
+			'title' : 'Elecciones generales',
+			'width' : w,
+			'height' : h
+		};
+
+		// Set chart options
+		var options2 = {
+			'title' : 'Elecciones 15M',
+			'width' : w,
+			'height' : h
+		};
+
+		// Instantiate and draw our chart, passing in some options.
+		var chart = new google.visualization.PieChart(document
+				.getElementById('chart_div'));
+		chart.draw(data, options);
+
+		// Instantiate and draw our chart, passing in some options.
+		var chart2 = new google.visualization.PieChart(document
+				.getElementById('chart_div2'));
+		chart2.draw(data2, options2);
+	}
+</script>
+<script type="text/javascript">
+	$(document).ready(function() {
+		$(".boton").button();
+		$(window).resize(function() {
+
+			// aquí le pasamos la clase o id de nuestro div a centrar (en este caso "caja")
+			$('#chart_div').css({
+				position : 'absolute',
+				left : ($(window).width() - 1100),
+				top : ($(window).height() - 650)
+			});
+
+			// aquí le pasamos la clase o id de nuestro div a centrar (en este caso "caja")
+			$('#chart_div2').css({
+				position : 'absolute',
+				left : ($(window).width() - 750),
+				top : ($(window).height() - 450)
+			});
+
+		});
+
+		// Ejecutamos la función
+		$(window).resize();
+	});
+</script>
+{% endblock %}
+{% block title %}{{ titulo }}{% endblock %}
+{% block content %}
+	<!--Div that will hold the pie chart-->
+	<div id="chart_div" class="graf"></div>
+	<div id="chart_div2" class="graf"></div>
+{% endblock %}

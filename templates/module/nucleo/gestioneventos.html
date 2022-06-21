@@ -1,0 +1,115 @@
+{% extends "layouts/module-layout.html" %}
+{% block javascript %}
+<script type="text/javascript">
+	var eventos;
+	function pintarTabla(){
+	    eventos = $('#eventos').dataTable( {
+	        "sScrollX": "100%",
+	        "bPaginate": false,
+	        "bLengthChange": false,
+	        "bFilter": true,
+	        "bSort": false,
+	        "bInfo": false,
+	        "bJQueryUI": true,
+	        "bAutoWidth": false,
+	        "bSortClasses": false
+	    } );
+	}
+	$(function() {
+        pintarTabla();
+		var dates = $("#from, #to")
+				.datepicker(
+						{
+							defaultDate : "+1w",
+							changeMonth : true,
+							numberOfMonths : 1,
+							onSelect : function(selectedDate) {
+								var option = this.id == "from" ? "minDate"
+										: "maxDate", instance = $(this).data(
+										"datepicker"), date = $.datepicker
+										.parseDate(
+												instance.settings.dateFormat
+														|| $.datepicker._defaults.dateFormat,
+												selectedDate, instance.settings);
+								dates.not(this).datepicker("option", option,
+										date);
+								var tarea = $("#tarea").val();
+								var from = $("#from").val();
+								var to = $("#to").val();
+								if (from != "" && to != "") {
+									eventos.fnClearTable();
+									$.post("{{ config.urlRoot }}eventos/", {
+										'from' : from,
+										'to' : to,
+                                        'tarea' : tarea
+									}, function(data) {
+										if (data != null) {
+											$.each(data.eventos, function(key,
+													val) {
+												eventos.fnAddData([ val.codigo,
+														val.inicio, val.fin,
+														val.hora ]);
+											});
+										}
+									}, "json").error(function(){
+						                $( "#mssger" ).html("No se han encontrado datos");
+						                $( "#mssger" ).dialog( "open" );
+						            });
+								}
+							}
+						});
+		$("#tarea").change(function (){
+			var tarea = $("#tarea").val();
+			var from = $("#from").val();
+			var to = $("#to").val();
+            eventos.fnClearTable();
+			$.post("{{ config.urlRoot }}eventos/", {
+                'from' : from,
+				'to' : to,
+                'tarea' : tarea
+            }, function(data) {
+                if (data != null) {
+                    $.each(data.eventos, function(key,
+                            val) {
+                        eventos.fnAddData([ val.codigo,
+                                val.inicio, val.fin,
+                                val.hora ]);
+                    });
+                }
+            }, "json").error(function(){
+            	$( "#mssger" ).html("No se han encontrado datos");
+                $( "#mssger" ).dialog( "open" );
+            });
+		});
+	});
+</script>
+{% endblock %}
+{% block title %}{{ titulo }}{% endblock %}
+{% block content %}
+    <div>
+		<table>
+			<tr>
+				<td><label for="from">Desde:</label><input type="text" id="from"
+					name="from" /></td>
+				<td><label for="to">Hasta:</label><input type="text" id="to"
+					name="to" /></td>
+                <td><label for="tarea">Tarea:</label><input type="text" id="tarea"
+                    name="tarea" /></td>
+			</tr>
+		</table>
+		<table style="width: 100%">
+			<tr>
+				<td><table id="eventos">
+						<thead>
+							<tr>
+								<th>C&oacute;digo</th>
+								<th>Inicio</th>
+								<th>Fin</th>
+								<th>Horas</th>
+							</tr>
+						</thead>
+					</table></td>
+			</tr>
+		</table>
+	</div>
+{% endblock %}

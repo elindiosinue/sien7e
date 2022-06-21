@@ -1,0 +1,155 @@
+<html>
+<head>
+<title>{{ titulo }}</title>
+
+<link type="text/css" rel="stylesheet" href="/static/css/hojatrabajo.css">
+<link type="text/css" rel="stylesheet" href="/static/css/main.css">
+<link rel="stylesheet" href="{{ config.theme }}" type="text/css" />
+<link type="text/css" rel="stylesheet"
+    href="/static/css/jquery.dataTables.css" />
+<link type="text/css" rel="stylesheet"
+    href="/static/css/jquery.dataTables_themeroller.css" />
+<link type="text/css" rel="stylesheet" href="/static/css/AutoFill.css" />
+<link type="text/css" rel="stylesheet" href="/static/css/ColReorder.css" />
+<link type="text/css" rel="stylesheet" href="/static/css/ColVis.css" />
+<link type="text/css" rel="stylesheet" href="/static/css/ColVisAlt.css" />
+<link type="text/css" rel="stylesheet"
+    href="/static/css/dataTables.scroller.css" />
+<link type="text/css" rel="stylesheet"
+    href="/static/css/TableTools_JUI.css" />
+<link type="text/css" rel="stylesheet" href="/static/css/TableTools.css" />
+<link type="text/css" rel="stylesheet" href="/static/css/dataTables.highlight.css"/>
+<script type="text/javascript" charset="utf-8"
+    src="https://www.google.com/jsapi?key=ABQIAAAAHgOg6huaKJAv9G24UHf1KBT-_2ssS9ZvfOvr1Ca1c9UJDHLkmhQMLz6VvDl-zLZ9USIlHGHxy3IcGg"></script>
+<script type="text/javascript" charset="utf-8">
+        google.load("chrome-frame", "1.0.2");
+        google.load("dojo", "1.6.1");
+        google.load("ext-core", "3.1.0");
+        google.load("mootools", "1.4.1");
+        google.load("swfobject", "2.2");
+        google.load("webfont", "1.0.22");
+        google.load("jquery", "1.6.4");
+        google.load("jqueryui", "1.8.16");
+        google.load('visualization', '1.0', {
+            'packages' : [ 'corechart' ]
+        });
+    </script>
+<script type="text/javascript" charset="utf-8"
+    src="/static/js/ui.datepicker-es.js"></script>
+<script type="text/javascript" charset="utf-8"
+    src="/static/js/jquery.dataTables.js"></script>
+<script type="text/javascript" charset="utf-8"
+    src="/static/js/AutoFill.js"></script>
+<script type="text/javascript" charset="utf-8"
+    src="/static/js/ColReorder.js"></script>
+<script type="text/javascript" charset="utf-8"
+    src="/static/js/ColVis.js"></script>
+<script type="text/javascript" charset="utf-8"
+    src="/static/js/dataTables.scroller.js"></script>
+<script type="text/javascript" charset="utf-8"
+    src="/static/js/FixedColumns.js"></script>
+<script type="text/javascript" charset="utf-8"
+    src="/static/js/FixedHeader.js"></script>
+<script type="text/javascript" charset="utf-8"
+    src="/static/js/KeyTable.js"></script>
+<script type="text/javascript" charset="utf-8"
+    src="/static/js/TableTools.js"></script>
+<script type="text/javascript" charset="utf-8"
+    src="/static/js/ZeroClipboard.js"></script>
+<script type="text/javascript" charset="utf-8"
+    src="/static/js/funciones.js"></script>
+<script type="text/javascript">
+	var eventos;
+	function pintarTabla(){
+	    eventos = $('#eventos').dataTable( {
+	        "sScrollX": "100%",
+	        "bPaginate": false,
+	        "bLengthChange": false,
+	        "bFilter": true,
+	        "bSort": false,
+	        "bInfo": false,
+	        "bJQueryUI": true,
+	        "bAutoWidth": false,
+	        "bSortClasses": false
+	    } );
+	    new FixedColumns( eventos, {
+	        "iLeftWidth" : 100,
+	        "iRightColumns" : 1
+	    } );
+	}
+	function total(){
+	    var num = 0;
+	    $("tr.totalDia").each(function (index){
+	        $(this).children("td").each(function (index){
+	            if("" != $(this).html() && /^([0-9])*[.]?[0-9]*$/.test($(this).html())){
+	                num = num + parseFloat($(this).html());
+	            }
+	        });
+	    });
+	    $("tr.totalDia").children("td").last().html(num);
+	}
+	$(function() {
+	    total();
+	    pintarTabla();
+	    $('#eventos td').live("hover", function(ev) {
+	        if (ev.type == 'mouseover' || ev.type == 'mouseenter') {
+	            var iCol = $('td', this.parentNode).index(this);
+	            $('td:nth-child('+(iCol+1)+')', eventos.$('tr')).addClass( 'highlighted' );
+	        }
+	        if (ev.type == 'mouseout' || ev.type == 'mouseleave') {
+	            eventos.$('td.highlighted').removeClass('highlighted');
+	        }
+	    });
+	    $("#mes, #anio").change(function(){
+	        $.post("/nucleo/hojatrabajo/", {
+	            'mes' : $("#mes").val(),
+	            'anio' : $("#anio").val()
+	        }, function(data) {
+	            if (data != null) {
+	                $("#tabla").html(data);
+	                total();
+	                pintarTabla();
+	            }
+	        }).error(function(){
+	            $( "#mssger" ).html("No se han encontrado datos");
+	            $( "#mssger" ).dialog( "open" );
+	        });
+	    });
+	});
+</script>
+</head>
+<body>
+	<table class="tablaMsj">
+		<tr id="inicio">
+			<td align="right"><a id="volver" class="volver"
+				href="{{ volver.url }}">{{ volver.nombre }}</a>&nbsp;<a id="alogin"
+				class="logout" href="{{ url }}">{{ url_linktext }}</a></td>
+		</tr>
+	</table>
+	<table>
+		<tr>
+			<td><label for="from">Mes:</label><select title="Mes:" id="mes" name="mes" >
+			{% for obj in meses %}
+			{% if obj.id == mes %}
+			<option title="{{ obj.desc }}" value="{{ obj.id }}" label="{{ obj.desc }}" selected="selected">{{ obj.desc }}</option>
+			{% else %}
+			<option title="{{ obj.desc }}" value="{{ obj.id }}" label="{{ obj.desc }}">{{ obj.desc }}</option>
+			{% endif %}
+			{% endfor %}
+			</select></td>
+			<td><label for="to">A&nacute;o:</label><select title="A&nacute;o:" id="anio" name="anio" >
+            {% for obj in anios %}
+            {% if obj.id == anio %}
+            <option title="{{ obj.desc }}" value="{{ obj.id }}" label="{{ obj.desc }}" selected="selected">{{ obj.desc }}</option>
+            {% else %}
+            <option title="{{ obj.desc }}" value="{{ obj.id }}" label="{{ obj.desc }}">{{ obj.desc }}</option>
+            {% endif %}
+            {% endfor %}
+            </select></td>
+		</tr>
+	</table>
+	<div id="tabla">
+		{% include 'include/hojatrabajo.html' %}
+	</div>
+</body>
+</html>

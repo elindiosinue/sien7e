@@ -1,0 +1,75 @@
+<html>
+<head>
+<title>{{ titulo }}</title>
+<link type="text/css" rel="stylesheet" href="/static/css/main.css"></link>
+<link rel="stylesheet" href="{{ config.theme }}" type="text/css" />
+<style>
+div#dvBienvenido {
+	width: 200px;
+	height: 100px;
+	position: absolute;
+	display: block;
+	right: 0;
+	bottom: 0;
+	background-color: #DEEDF7;
+	text-align: center;
+}
+
+select,input {
+	margin-left: 15px;
+}
+</style>
+<script type="text/javascript"
+	src="https://www.google.com/jsapi?key=ABQIAAAAHgOg6huaKJAv9G24UHf1KBT-_2ssS9ZvfOvr1Ca1c9UJDHLkmhQMLz6VvDl-zLZ9USIlHGHxy3IcGg"></script>
+<script type="text/javascript">
+	google.load("jquery", "1.6.4");
+	google.load("jqueryui", "1.8.16");
+</script>
+<script type="text/javascript" src="/static/js/funciones.js"></script>
+<script type="text/javascript">
+	$(document).ready(
+			function() {
+				$(".boton").button();
+				$(window).resize(
+						function() {
+
+							// aquí le pasamos la clase o id de nuestro div a centrar (en este caso "caja")
+							$('#dvBienvenido')
+									.css(
+											{
+												position : 'absolute',
+												left : ($(window).width() - $(
+														'#dvBienvenido')
+														.outerWidth()) / 2,
+												top : ($(window).height() - $(
+														'#dvBienvenido')
+														.outerHeight()) / 2
+											});
+
+						});
+
+				// Ejecutamos la función
+				$(window).resize();
+			});
+</script>
+</head>
+<body>
+	<div id="dvBienvenido">
+		<table align="center" height="100%" width="100%" border="5"
+			bordercolor="#C1CFEE" cellpadding="0" cellspacing="0">
+			<caption>&Aacute;rea restringida</caption>
+			<thead>
+				<tr>
+					<th>Bienvenido</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td align="center"><a id="entrar" class="boton"
+						href="{{ url }}">Entrar</a></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</body>
+</html>

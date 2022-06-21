@@ -1,0 +1,92 @@
+{% extends "layouts/module-layout.html" %}
+{% block head %}
+{% endblock %}
+{% block javascript %}
+<script type="text/javascript">
+    var eventos;
+    function pintarTabla(){
+        eventos = $('#eventos').dataTable( {
+            "sScrollX": "100%",
+            "bPaginate": false,
+            "bLengthChange": false,
+            "bFilter": true,
+            "bSort": false,
+            "bInfo": false,
+            "bJQueryUI": true,
+            "bAutoWidth": false,
+            "bSortClasses": false
+        } );
+        new FixedColumns( eventos, {
+            "iLeftWidth" : 100,
+            "iRightColumns" : 1
+        } );
+    }
+    function total(){
+        var num = 0;
+        $("tr.totalDia").each(function (index){
+            $(this).children("td").each(function (index){
+                if("" != $(this).html() && /^([0-9])*[.]?[0-9]*$/.test($(this).html())){
+                    num = num + parseFloat($(this).html());
+                }
+            });
+        });
+        $("tr.totalDia").children("td").last().html(num);
+    }
+    $(function() {
+        total();
+        pintarTabla();
+        $('#eventos td').live("hover", function(ev) {
+            if (ev.type == 'mouseover' || ev.type == 'mouseenter') {
+                var iCol = $('td', this.parentNode).index(this);
+                $('td:nth-child('+(iCol+1)+')', eventos.$('tr')).addClass( 'highlighted' );
+            }
+            if (ev.type == 'mouseout' || ev.type == 'mouseleave') {
+                eventos.$('td.highlighted').removeClass('highlighted');
+            }
+        });
+        $("#mes, #anio").change(function(){
+            $.post("{{ config.urlRoot }}hojatrabajo/", {
+                'mes' : $("#mes").val(),
+                'anio' : $("#anio").val()
+            }, function(data) {
+                if (data != null) {
+                    $("#tabla").html($("#tabla", data).html());
+                    pintarTabla();
+                    total();
+                }
+            }).error(function(){
+                $( "#mssger" ).html("No se han encontrado datos");
+                $( "#mssger" ).dialog( "open" );
+            });
+        });
+    });
+</script>
+{% endblock %}
+{% block css %}
+{% endblock %}
+{% block title %}{{ titulo }}{% endblock %}
+{% block content %}
+	<table>
+		<tr>
+			<td><label for="mes">Mes:</label><select title="Mes:" id="mes" name="mes" >
+			{% for obj in meses %}
+			{% if obj.id == mes %}
+			<option title="{{ obj.desc }}" value="{{ obj.id }}" label="{{ obj.desc }}" selected="selected">{{ obj.desc }}</option>
+			{% else %}
+			<option title="{{ obj.desc }}" value="{{ obj.id }}" label="{{ obj.desc }}">{{ obj.desc }}</option>
+			{% endif %}
+			{% endfor %}
+			</select></td>
+			<td><label for="anio">A&nacute;o:</label><select title="A&nacute;o:" id="anio" name="anio" >
+            {% for obj in anios %}
+            {% if obj.id == anio %}
+            <option title="{{ obj.desc }}" value="{{ obj.id }}" label="{{ obj.desc }}" selected="selected">{{ obj.desc }}</option>
+            {% else %}
+            <option title="{{ obj.desc }}" value="{{ obj.id }}" label="{{ obj.desc }}">{{ obj.desc }}</option>
+            {% endif %}
+            {% endfor %}
+            </select></td>
+		</tr>
+	</table>
+    {% include 'includes/nucleo/hojatrabajo.html' %}
+{% endblock %}

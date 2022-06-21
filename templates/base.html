@@ -1,0 +1,118 @@
+{# (C) Copyright 2011 Jose Carrasco
+<jose.carrasco at vikuit dot com> (C) Copyright 2011
+Jose Blanco <jose.blanco [a]vikuit.com> This file is part
+of "vikuit". "vikuit" is free software: you can redistribute it and/or
+modify it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version. "vikuit" is distributed
+in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+PURPOSE. See the GNU Affero General Public License for more details. You
+should have received a copy of the GNU Affero General Public License
+along with "vikuit". If not, see <http: //www.gnu.org/licenses />. #}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+<meta http-equiv="pragma" content="no-cache" />
+<meta http-equiv="cache-control" content="no-cache" />
+{% block head %}{% endblock %}
+
+<script type="text/javascript" charset="utf-8"
+	src="https://www.google.com/jsapi?key=ABQIAAAAHgOg6huaKJAv9G24UHf1KBT-_2ssS9ZvfOvr1Ca1c9UJDHLkmhQMLz6VvDl-zLZ9USIlHGHxy3IcGg"></script>
+<script type="text/javascript" charset="utf-8">
+	google.load("jquery", "1.6.4");
+	google.load("jqueryui", "1.8.16");
+	google.load('visualization', '1.0', {
+		'packages' : [ 'corechart' ]
+	});
+</script>
+<script type="text/javascript" charset="utf-8"
+	src="/static/js/jquery-ui.min.js"></script>
+<script type="text/javascript" charset="utf-8"
+	src="/static/js/ui.datepicker-es.js"></script>
+<script type="text/javascript" charset="utf-8"
+	src="/static/js/jquery.dataTables.js"></script>
+<script type="text/javascript" charset="utf-8"
+	src="/static/js/AutoFill.js"></script>
+<script type="text/javascript" charset="utf-8"
+	src="/static/js/ColReorder.js"></script>
+<script type="text/javascript" charset="utf-8"
+	src="/static/js/ColVis.js"></script>
+<script type="text/javascript" charset="utf-8"
+	src="/static/js/dataTables.scroller.js"></script>
+<script type="text/javascript" charset="utf-8"
+	src="/static/js/FixedColumns.js"></script>
+<script type="text/javascript" charset="utf-8"
+	src="/static/js/FixedHeader.js"></script>
+<script type="text/javascript" charset="utf-8"
+	src="/static/js/KeyTable.js"></script>
+<script type="text/javascript" charset="utf-8"
+	src="/static/js/TableTools.js"></script>
+<script type="text/javascript" charset="utf-8"
+	src="/static/js/ZeroClipboard.js"></script>
+<script type="text/javascript" charset="utf-8"
+	src="/static/js/funciones.js"></script>
+<script type="text/javascript" src="/static/js/jquery.validate.min.js"></script>
+
+{% block javascript %}{% endblock %}
+
+<!-- Vikuit base Scripts -->
+<script type="text/javascript" charset="utf-8">
+	var auth = "{{ auth }}";
+	if (top.location != location) {
+		top.location.href = document.location.href;
+	}
+</script>
+
+<link rel="stylesheet" href="/static/css/style.css" type="text/css" />
+<link rel="stylesheet" href="{{ config.theme }}" type="text/css" />
+<link type="text/css" rel="stylesheet"
+	href="/static/css/jquery.dataTables.css" />
+<link type="text/css" rel="stylesheet"
+	href="/static/css/jquery.dataTables_themeroller.css" />
+<link type="text/css" rel="stylesheet" href="/static/css/AutoFill.css" />
+<link type="text/css" rel="stylesheet" href="/static/css/ColReorder.css" />
+<link type="text/css" rel="stylesheet" href="/static/css/ColVis.css" />
+<link type="text/css" rel="stylesheet" href="/static/css/ColVisAlt.css" />
+<link type="text/css" rel="stylesheet"
+	href="/static/css/dataTables.scroller.css" />
+<link type="text/css" rel="stylesheet"
+	href="/static/css/TableTools_JUI.css" />
+<link type="text/css" rel="stylesheet" href="/static/css/TableTools.css" />
+<link rel="icon" href="/static/images/favicon.ico" type="image/x-icon" />
+<link type="text/css" rel="stylesheet"
+	href="/static/css/dataTables.highlight.css" />
+<link rel="stylesheet" href="/static/css/jqueryui/jquery.ui.all.css">
+{% block css %}{% endblock %}
+
+<title>{% block title %}{% endblock %}</title>
+<!--  Theme CSS -->
+{% include 'themes/'+app.theme+'/css.html' %}
+<!--  Google Analytics-->
+{% include 'includes/base/google-analytics.html' %}
+
+</head>
+
+<body>
+
+	{% include 'themes/'+app.theme+'/top.html' %}
+	<!-- end of top -->
+	<div class="main" style="border: 0px; width: 998px;">
+		<!-- first column -->
+		<div class="left_column">{% block leftSidebar %}{% endblock %}</div>
+		<!-- second column -->
+		<div class="center_column">{% block content %}{% endblock %}</div>
+		<!-- third column -->
+		<div class="right_column">{% block rightSidebar %}{% endblock %}
+		</div>
+
+		<div class="clear_both"></div>
+		<div class="banner_bottom"></div>
+		<!-- end of body -->
+	</div>
+
+	<!-- Foot -->
+	{% include 'themes/'+app.theme+'/bottom.html' %}
+</body>
+</html>

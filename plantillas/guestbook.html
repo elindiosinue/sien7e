@@ -1,0 +1,183 @@
+<html>
+<head>
+<title>{{ titulo }}</title>
+<link type="text/css" rel="stylesheet" href="/static/css/main.css"></link>
+<link rel="stylesheet" href="{{ config.theme }}" type="text/css" />
+<script type="text/javascript"
+	src="https://www.google.com/jsapi?key=ABQIAAAAHgOg6huaKJAv9G24UHf1KBT-_2ssS9ZvfOvr1Ca1c9UJDHLkmhQMLz6VvDl-zLZ9USIlHGHxy3IcGg"></script>
+<script type="text/javascript">
+	google.load("chrome-frame", "1.0.2");
+	google.load("dojo", "1.6.1");
+	google.load("ext-core", "3.1.0");
+	google.load("jquery", "1.6.4");
+	google.load("jqueryui", "1.8.16");
+	google.load("mootools", "1.4.1");
+	google.load("swfobject", "2.2");
+	google.load("webfont", "1.0.22");
+</script>
+<script type="text/javascript" src="/static/js/funciones.js"></script>
+<script type="text/javascript">
+	var c = 0;
+	var t;
+	var timer_is_on = 1;
+
+	function mensajes() {
+		$.getJSON("/nucleo/guestbook/mensajes", function(data) {
+			if (data != null) {
+				var objAnt;
+				var objAct;
+				$.each(data, function(key, val) {
+					if ((objAnt != null || objAnt != '') && objAnt != objAct)
+						objAnt = objAct;
+					objAct = key;
+					if ($("#desde_" + objAct).length == 0) {
+						if ((objAnt == null || objAnt == '')
+								|| (val.titdate != null && val.titdate != '')) {
+							if ($("#titdate_" + objAnt).html() == val.titdate) {
+								$("#titdate_" + objAnt).parent("tr").remove();
+							}
+							newdate(objAct, val);
+							newobject(".fechaMsj:first", objAct, val, 1);
+						} else {
+							newobject($("#desde_" + objAnt).parent("tr"),
+									objAct, val, 0);
+						}
+					} else {
+						$("#desde_" + objAct).html(val.desde);
+					}
+				});
+			}
+		});
+		t = setTimeout("mensajes()", 10000);
+	}
+
+	function newobject(psitio, id, data, pos) {
+		var tr;
+		if (data.author != null && data.author != '') {
+			tr = $("<tr class=\"trMsj\"><td align=\"left\" valign=\"top\" width=\"250px\"><b>"
+					+ data.author.nickname
+					+ "</b> wrote:</td><td align=\"left\"><blockquote>"
+					+ data.content
+					+ "</blockquote></td><td id=\"desde_" + id + "\">"
+					+ data.desde + "</td></tr>");
+		} else {
+			tr = $("<tr class=\"trMsj\"><td align=\"left\" valign=\"top\" width=\"250px\">An anonymous person wrote:</td><td align=\"left\"><blockquote>"
+					+ data.content
+					+ "</blockquote></td><td id=\"desde_" + id + "\">"
+					+ data.desde + "</td></tr>");
+		}
+		if (pos == 1)
+			$(psitio).after(tr);
+		else
+			$(psitio).after(tr);
+	}
+
+	function newdate(id, data) {
+		var tr = $("<tr class=\"fechaMsj\"><td align=\"center\" colspan=\"2\" id=\"titdate_" + id + "\">"
+				+ data.titdate + "</td></tr>");
+		$("#trform").after(tr);
+	}
+
+	function doTimer() {
+		if (!timer_is_on) {
+			timer_is_on = 1;
+			mensajes();
+		}
+	}
+
+	function stopCount() {
+		clearTimeout(t);
+		timer_is_on = 0;
+	}
+
+	$(document).ready(function() {
+		$("#dialog").dialog({
+			title : 'Login',
+			autoOpen : false,
+			width : 400,
+			height : 350,
+			modal : true,
+			close : function() {
+				$.getJSON("/login/", function(data) {
+					if (data != null) {
+						$.each(data, function(key, val) {
+							if (key == "url") {
+								$("#urlLogin").val(val);
+							} else if (key == "url_linktext") {
+								$("#alogin").html(decodeURIComponent(val));
+							}
+						});
+					}
+				});
+			}
+		});
+		$("#content").keyup(function() {
+			$("#tamContent").html($("#content").val().length);
+		})
+		$("#content").keydown(function() {
+			$("#tamContent").html($("#content").val().length);
+		})
+		$("#tamContent").html($("#content").val().length);
+		$("#publicar").click(function() {
+			if ($("#content").val().length == 0)
+				return false;
+		});
+		//doTimer();
+	});
+</script>
+</head>
+<body>
+	<table align="center" class="tablaMsj">
+		<tr id="inicio">
+			<td align="right"><a id="volver" class="volver"
+				href="{{ volver.url }}">{{ volver.nombre }}</a>&nbsp;<a id="alogin"
+				class="logout" href="{{ url }}">{{ url_linktext }}</a></td>
+		</tr>
+	</table>
+	<table align="center" class="ppal">
+		<tr id="trform">
+			<td align="center" colspan="2">
+				<form action="/nucleo/guestbook/sign" method="post">
+					<div>
+						<table>
+							<tr>
+								<td><textarea id="content" name="content" rows="3"
+										cols="60"></textarea></td>
+							</tr>
+							<tr>
+								<td id="tamContent" align="right">0</td>
+							</tr>
+						</table>
+					</div>
+					<div>
+						<input type="submit" value="Publicar" id="publicar">
+					</div>
+					<input type="hidden" id="urlLogin" value="{{ url }}">
+				</form>
+			</td>
+		</tr>
+		{% for comentario in comentarios %} {% if comentario.titdate %}
+		<tr class="fechaMsj">
+			<td align="center" colspan="2" id="titdate_{{ comentario.key.id }}">{{ comentario.titdate }}</td>
+		</tr>
+		{% endif %}
+		<tr class="trMsj">
+			<td align="left" valign="top" width="250px">{% if
+				comentario.author %} <b>{{ comentario.author }}</b> wrote: {% else %} Ananonymous person wrote: {% endif %}
+			</td>
+			<td align="left">
+				<blockquote>{{ comentario.content }}</blockquote>
+			</td>
+			<td id="desde_{{ comentario.key.id }}">{{ comentario.desde }}</td>
+		</tr>
+		{% endfor %}
+	</table>
+	<div id="dialog" style="z-index: 99">
+		<center>
+			<iframe id="iframe" src="" align="middle"
+				style="vertical-align: middle; width: 350px; height: 250px;"
+				frameborder="0" marginheight="0" marginwidth="0"></iframe>
+		</center>
+	</div>
+</body>
+</html>

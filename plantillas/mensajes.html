@@ -1,0 +1,21 @@
+<html>
+<head>
+<title>Mensaje</title>
+<link rel="stylesheet" href="{{ config.theme }}" type="text/css" />
+<script type="text/javascript"
+	src="https://www.google.com/jsapi?key=ABQIAAAAHgOg6huaKJAv9G24UHf1KBT-_2ssS9ZvfOvr1Ca1c9UJDHLkmhQMLz6VvDl-zLZ9USIlHGHxy3IcGg"></script>
+<script type="text/javascript">
+	google.load("jquery", "1.6.4");
+	google.load("jqueryui", "1.8.16");
+</script>
+<script type="text/javascript">
+	$(document).ready(function() {
+		$("#dialog").dialog("close");
+	});
+</script>
+</head>
+<body>
+	<div align="center"
+		style="width: 100%; height: 100%; vertical-align: middle;">{{ msj }}</div>
+</body>
+</html>

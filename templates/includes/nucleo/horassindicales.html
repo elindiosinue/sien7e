@@ -1,0 +1,32 @@
+<div id="tabla">
+    <table id="eventos" width="578px">
+        <caption>{{ titulo }}</caption>
+        <thead>
+            <tr>
+                <th class="codigo">C&oacute;digo</th>
+                {% for obj in dias %}
+                <th id="{{ obj.dia }}">{{ obj.num }}</th>
+                {% endfor %}
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+           {% for tarea in tareas %}
+           <tr>
+               <td>{{ tarea.codigo }}</td>
+               {% for dia in dias %}
+                  <td>{% if dia.weekend == 'N' %}{% for evento in hoja %}{% if evento.dia == dia.dia and evento.codigo == tarea.codigo %}{% if evento.hora %}{{ evento.hora }}{% else %}0{% endif %}{% endif %}{% endfor %}{% else %}X{% endif %}</td>
+               {% endfor %}
+               <td>{% for obj in totalEventos %}{% if obj.codigo == tarea.codigo %}{{ obj.hora }}{% endif %}{% endfor %}</td>
+           </tr>
+           {% endfor %}
+           <tr class="totalDia">
+               <td>Total</td>
+                {% for dia in dias %}
+                    <td>{% if dia.weekend == 'N' %}{% for obj in totalDias %}{% if dia.dia == obj.dia %}{{ obj.hora }}{% endif %}{% endfor %}{% else %}X{% endif %}</td>
+                {% endfor %}
+               <td>&nbsp;</td>
+           </tr>
+        </tbody>
+    </table>
+</div>

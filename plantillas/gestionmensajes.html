@@ -1,0 +1,363 @@
+<html>
+<head>
+<title>{{ titulo }}</title>
+<link type="text/css" rel="stylesheet" href="/static/css/main.css"></link>
+<link rel="stylesheet" href="{{ config.theme }}" type="text/css" />
+<script type="text/javascript"
+	src="https://www.google.com/jsapi?key=ABQIAAAAHgOg6huaKJAv9G24UHf1KBT-_2ssS9ZvfOvr1Ca1c9UJDHLkmhQMLz6VvDl-zLZ9USIlHGHxy3IcGg"></script>
+<script type="text/javascript">
+	google.load("jquery", "1.6.4");
+	google.load("jqueryui", "1.8.16");
+</script>
+<script type="text/javascript" src="/static/js/funciones.js"></script>
+<script type="text/javascript" src="/static/js/clases/mensajes.js"></script>
+<script type="text/javascript">
+	var c = 0;
+	var t;
+	var timer_is_on = 0;
+
+	function consulta() {
+		$.getJSON("/nucleo/admin/mensajes/cons", function(data) {
+			if (data != null) {
+				$.each(data, function(key, val) {
+					if ($("#col1_" + key).length == 0) {
+						if ($("#col1_" + (key - 1)).length == 0) {
+							newobject($("#trnuevo"), 'D', val);
+						} else {
+							newobject($("#col1_" + (key - 1)).parent("tr"),
+									'D', val);
+						}
+					}
+				});
+			}
+		});
+		t = setTimeout("consulta()", 10000);
+	}
+
+	$(document)
+			.ready(
+					function() {
+						$("#tipo")
+								.autocomplete(
+										{
+											source : function(request, response) {
+												$
+														.getJSON(
+																"/nucleo/list/tiposmensajes/",
+																{
+																	input : request.term,
+																	max : 7
+																},
+																function(data) {
+																	response($
+																			.map(
+																					data,
+																					function(
+																							item) {
+																						return {
+																							label : item.nombre,
+																							value : item.id
+																						}
+																					}));
+																});
+											},
+											minLength : 2,
+											select : function(event, ui) {
+												$("#tipo").val(ui.item.label);
+												$("#idtipo").val(ui.item.value);
+												return false;
+											},
+											open : function() {
+												$(this)
+														.removeClass(
+																"ui-corner-all")
+														.addClass(
+																"ui-corner-top");
+											},
+											close : function() {
+												$(this)
+														.removeClass(
+																"ui-corner-top")
+														.addClass(
+																"ui-corner-all");
+											}
+										});
+
+						$(".nuevo").click(function() {
+							if ($("#idudp").length == 0) {
+								resetearFormulario("uno");
+								$(".trnuevo").show();
+							}
+						});
+
+						$("#grabar")
+								.click(
+										function() {
+											var p = obj;
+											p.cod = $("#cod").val();
+											p.lTipo = $("#idtipo").val();
+											p.msj = $("#msj").val();
+											p.accion = "I";
+											$
+													.post(
+															"/nucleo/admin/mensajes/",
+															p,
+															function(data) {
+																if (data != null) {
+																	newobject(
+																			$("#trbuttons"),
+																			'A',
+																			data.obj)
+																	resetearFormulario("uno");
+																	$(
+																			".trnuevo")
+																			.hide();
+																}
+															}, "json");
+										});
+
+						$("#cancelar").click(function() {
+							resetearFormulario("uno");
+							$(".trnuevo").hide();
+						});
+
+						$(".tdelemento")
+								.live(
+										"click",
+										function() {
+											if ($("#idudp").length == 0
+													&& !$(".trnuevo").is(
+															":visible")) {
+												var id = $(this).attr("id")
+														.split("_")[1];
+												var aux = "";
+												var p = obj;
+												for ( var i = 1; i <= cols; i++) {
+													if (i == 2) {
+														aux = $(
+																"#col" + i
+																		+ "1_"
+																		+ id)
+																.html();
+														p[i - 1] = $(
+																"#col" + i
+																		+ "2_"
+																		+ id)
+																.val();
+													} else {
+														p[i - 1] = $(
+																"#col" + i
+																		+ "_"
+																		+ id)
+																.html();
+													}
+												}
+												limpiarFila(id);
+												for ( var i = 1; i <= cols; i++) {
+													if (i == 2) {
+														newinput("#col" + i
+																+ "_" + id,
+																"udpcol" + i
+																		+ "1",
+																"text", aux);
+														newinput("#col" + i
+																+ "_" + id,
+																"udpcol" + i
+																		+ "2",
+																"hidden",
+																p[i - 1]);
+														newinput("#col" + i
+																+ "_" + id,
+																"oldcol" + i
+																		+ "1",
+																"hidden", aux);
+														newinput("#col" + i
+																+ "_" + id,
+																"oldcol" + i
+																		+ "2",
+																"hidden",
+																p[i - 1]);
+														lista("udpcol" + i
+																+ "1", "udpcol"
+																+ i + "2",
+																"/list/tiposmensajes/");
+													} else {
+														newinput("#col" + i
+																+ "_" + id,
+																"udpcol" + i,
+																"text",
+																p[i - 1]);
+														newinput("#col" + i
+																+ "_" + id,
+																"oldcol" + i,
+																"hidden",
+																p[i - 1]);
+													}
+												}
+												$("#udpcol1").attr("size", 3)
+												$("#udpcol2").attr("size", 3)
+												updbottons(
+														$(this).parent("tr"),
+														cols);
+												$("#idudp").val(id);
+											}
+										});
+
+						$("#grabarudp")
+								.live(
+										"click",
+										function() {
+											var padre = "";
+											var id = $("#idudp").val();
+											var p = obj;
+											p.id = id;
+											p.cod = $("#udpcol1").val();
+											p.lTipo = $("#udpcol22").val();
+											p.msj = $("#udpcol3").val();
+											p.accion = "A";
+											$
+													.post(
+															"/nucleo/admin/mensajes/actu",
+															p,
+															function(data) {
+																limpiarFila(id);
+																$("#col1_" + id)
+																		.html(
+																				data.obj.cod);
+																$(
+																		"<p id=\"col21_" + id + "\"></p>")
+																		.appendTo(
+																				"#col2_"
+																						+ id);
+																newinput(
+																		"#col2_"
+																				+ id,
+																		"col22_"
+																				+ id,
+																		"hidden",
+																		"");
+																if (data.obj.lTipo != null
+																		&& data.obj.lTipo != "") {
+																	$(
+																			"#col21_"
+																					+ id)
+																			.html(
+																					data.obj.lTipo.cod);
+																	$(
+																			"#col22_"
+																					+ id)
+																			.val(
+																					data.obj.lTipo.id);
+																}
+																$("#col3_" + id)
+																		.html(
+																				data.obj.msj);
+																$(".trudp")
+																		.remove();
+															}, "json");
+										});
+
+						$("#cancelarudp").live(
+								"click",
+								function() {
+									var id = $("#idudp").val();
+									var p = obj;
+									var aux = "";
+									for ( var i = 1; i <= cols; i++) {
+										if (i == 2) {
+											aux = $("#oldcol" + i + "1").val();
+											p[i - 1] = $("#oldcol" + i + "2")
+													.val();
+										} else {
+											p[i - 1] = $("#oldcol" + i).val();
+										}
+									}
+									limpiarFila(id);
+									for ( var i = 1; i <= cols; i++) {
+										if (i == 2) {
+											$(
+													"<p id=\"col" + i + "1_" + id + "\">"
+															+ aux + "</p>")
+													.appendTo(
+															"#col" + i + "_"
+																	+ id);
+											newinput("#col" + i + "_" + id,
+													"col" + i + "2_" + id,
+													"hidden", p[i - 1]);
+										} else {
+											$("#col" + i + "_" + id).html(
+													p[i - 1]);
+										}
+									}
+									$(".trudp").remove();
+								});
+
+						$("input").live("click", function() {
+							//return false;
+						});
+
+						$(".inhabilitado").live("click", function() {
+							return false;
+						});
+
+						//doTimer();
+					});
+</script>
+</head>
+<body>
+	<table align="center" class="tablaMsj">
+		<tr id="inicio">
+			<td align="right"><a id="volver" class="volver"
+				href="{{ volver.url }}">{{ volver.nombre }}</a>&nbsp;<a id="alogin"
+				class="logout" href="{{ url }}">{{ url_linktext }}</a></td>
+		</tr>
+	</table>
+	<form action="#" id="uno">
+		<table align="center" class="ppal">
+			<tr>
+				<td align="center" colspan="{{ cols }}">{{ titulo }}</td>
+			</tr>
+			<tr id="cabecera">
+				<td align="center">C&oacute;digo</td>
+				<td align="center">Tipo</td>
+				<td align="center">Mensaje</td>
+			</tr>
+			<tr class="trnuevo" style="display: none;">
+				<td><input name="cod" id="cod" type="text" size="3"></td>
+				<td><input name="tipo" id="tipo" type="text" size="3"><input
+					name="idtipo" id="idtipo" type="hidden"></td>
+				<td><input name="msj" id="msj" type="text" style="width: 100%"></td>
+			</tr>
+			<tr id="trnuevo" class="trnuevo" style="display: none;">
+				<td align="right" colspan="{{ cols }}"><a href="#" id="grabar"
+					class="grabar">Grabar</a>&nbsp;<a href="#" id="cancelar"
+					class="cancelar">Cancelar</a> <input name="id" type="hidden"
+					id="id"></td>
+			</tr>
+			{% if arr %} {% for obj in arr %}
+			<tr class="fila">
+				<td class="tdelemento" id="col1_{{ obj.key.id }}">{{ obj.nombre }}</td> {% if obj.lTipo %}
+				<td class="tdelemento" id="col2_{{ obj.key.id }}"><p
+						id="col21_{{ obj.key.id }}">{{ obj.lTipo.cod }}</p>
+					<input name="idpadre_{{ obj.key.id }}" id="col22_{{ obj.key.id }}"
+					type="hidden" value="{{ obj.lTipo.key.id }}"></td> {% else %}
+				<td class="tdelemento" id="col2_{{ obj.key.id }}"><p
+						id="col21_{{ obj.key.id }}"></p>
+					<input name="col22_{{ obj.key.id }}" id="col52_{{ obj.key.id }}"
+					type="hidden" value=""></td> {% endif %}
+				<td class="tdelemento" id="col3_{{ obj.key.id }}">{{ obj.msj }}</td>
+			</tr>
+			{% endfor %} {% else %}
+			<tr>
+				<td align="center" colspan="{{ cols }}" align="center">No hay
+					elementos</td>
+			</tr>
+			{% endif %}
+			<tr id="trbuttons">
+				<td colspan="{{ cols }}" align="right"><a href="#"
+					class="nuevo">Nuevo</a></td>
+			</tr>
+		</table>
+	</form>
+</body>
+</html>

@@ -1,0 +1,69 @@
+{% extends "layouts/module-layout.html" %}
+{% block head %}
+{% endblock %}
+{% block javascript %}
+<script type="text/javascript">
+	$(document).ready(
+			function() {
+				$(".boton").button();
+				$(window).resize(
+						function() {
+
+							// aquí le pasamos la clase o id de nuestro div a centrar (en este caso "caja")
+							$('#dvBienvenido')
+									.css(
+											{
+												position : 'absolute',
+												left : ($(window).width() - $(
+														'#dvBienvenido')
+														.outerWidth()) / 2,
+												top : ($(window).height() - $(
+														'#dvBienvenido')
+														.outerHeight()) / 2
+											});
+
+						});
+
+				// Ejecutamos la función
+				$(window).resize();
+			});
+</script>
+{% endblock %}
+{% block css %}
+<style>
+div#dvBienvenido {
+    width: 200px;
+    height: 100px;
+    position: absolute;
+    display: block;
+    right: 0;
+    bottom: 0;
+    background-color: #DEEDF7;
+    text-align: center;
+}
+
+select,input {
+    margin-left: 15px;
+}
+</style>
+{% endblock %}
+{% block title %}{{ titulo }}{% endblock %}
+{% block content %}
+	<div id="dvBienvenido">
+		<table align="center" height="100%" width="100%" border="5"
+			bordercolor="#C1CFEE" cellpadding="0" cellspacing="0">
+			<caption>&Aacute;rea restringida</caption>
+			<thead>
+				<tr>
+					<th>Bienvenido</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td align="center"><a id="entrar" class="boton"
+						href="{{ url }}">Entrar</a></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+{% endblock %}

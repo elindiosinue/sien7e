@@ -1,0 +1,30 @@
+<table><tr><td width="100%">{{ titulo }}</td></tr></table>
+<table id="eventos">
+    <thead>
+        <tr>
+            <th class="codigo">C&oacute;digo</th>
+            {% for obj in dias %}
+            <th id="{{ obj.dia }}" class="dia">{{ obj.num }}</th>
+            {% endfor %}
+            <th class="total">Total</th>
+        </tr>
+    </thead>
+    <tbody>
+       {% for tarea in tareas %}
+       <tr>
+           <td class="codigo">{{ tarea.codigo }}</td>
+           {% for dia in dias %}
+              <td class="dia">{% if dia.weekend == 'N' %}{% for evento in hoja %}{% if evento.dia == dia.dia and evento.codigo == tarea.codigo %}{% if evento.hora %}{{ evento.hora }}{% else %}0{% endif %}{% endif %}{% endfor %}{% else %}X{% endif %}</td>
+           {% endfor %}
+           <td class="total">{% for obj in totalEventos %}{% if obj.codigo == tarea.codigo %}{{ obj.hora }}{% endif %}{% endfor %}</td>
+       </tr>
+       {% endfor %}
+       <tr>
+           <td class="codigo">Total</td>
+            {% for dia in dias %}
+                <td class="dia">{% if dia.weekend == 'N' %}{% for obj in totalDias %}{% if dia.dia == obj.dia %}{{ obj.hora }}{% endif %}{% endfor %}{% else %}X{% endif %}</td>
+            {% endfor %}
+           <td class="total">&nbsp;</td>
+       </tr>
+    </tbody>
+</table>

@@ -1,0 +1,82 @@
+<html>
+<head>
+<title>{{ titulo }}</title>
+<link type="text/css" rel="stylesheet" href="/static/css/main.css"></link>
+<link rel="stylesheet" href="{{ config.theme }}" type="text/css" />
+<style>
+div#menu {
+	width: 300px;
+	position: absolute;
+	display: block;
+	right: 0;
+	bottom: 0;
+	background-color: #DEEDF7;
+	text-align: center;
+}
+
+select,input {
+	margin-left: 15px;
+}
+</style>
+<script type="text/javascript"
+	src="https://www.google.com/jsapi?key=ABQIAAAAHgOg6huaKJAv9G24UHf1KBT-_2ssS9ZvfOvr1Ca1c9UJDHLkmhQMLz6VvDl-zLZ9USIlHGHxy3IcGg"></script>
+<script type="text/javascript">
+	google.load("jquery", "1.6.4");
+	google.load("jqueryui", "1.8.16");
+</script>
+<script type="text/javascript" src="/static/js/funciones.js"></script>
+<script type="text/javascript">
+	$(document).ready(function() {
+		$("#menu").accordion({
+			event : "mouseover",
+			autoHeight : true,
+			collapsible : true
+		});
+		$(".inhabilitado").click(function() {
+			return false;
+		});
+		$(window).resize(function() {
+			// aqui le pasamos la clase o id de nuestro div a centrar (en este caso "caja")
+			$('#menu').css({
+				position : 'absolute',
+				left : ($(window).width() - $('#menu').outerWidth()) / 2,
+				top : ($(window).height() - $('#menu').outerHeight()) / 2
+			});
+		});
+
+		// Ejecutamos la funcion
+		$(window).resize();
+	});
+</script>
+</head>
+<body>
+	<table align="center" class="tablaMsj" cellpadding="0" cellspacing="0"
+		width="100%">
+		<tr id="inicio">
+			<td align="right"><a id="alogin" class="logout" href="{{ url }}">{{
+					url_linktext }}</a></td>
+		</tr>
+	</table>
+	<div id="menu">
+	{% if objs %}{% for pantalla in objs %}{% if not pantalla.padre or not pantalla.padre.visible %}{% if not loop.first %}</div>{% endif %}
+	<h4>
+		<a id="entrar"
+			href="{% if pantalla.url %}/nucleo/{{ pantalla.url }}{% else %}#{% endif %}">{{
+			pantalla.titulo }}</a>
+	</h4>
+	<div aling="center">
+		{% endif %} {% if pantalla.padre and pantalla.padre.visible %}
+		<h5>
+			<a id="entrar"
+				href="{% if pantalla.url %}/nucleo/{{ pantalla.url }}{% else %}#{% endif %}">{{ pantalla.titulo }}</a>
+		</h5>
+		{% endif %} {% if loop.last %}
+	</div>
+	{% endif %} {% endfor %} {% else %}
+	<h4>
+		<a href="#">No hay opciones</a>
+	</h4>
+	{% endif %}
+	</div>
+</body>
+</html>

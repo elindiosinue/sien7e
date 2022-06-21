@@ -1,0 +1,30 @@
+{% extends "layouts/module-layout.html" %}
+{% block head %}
+<script type="text/javascript">
+	var diasSel = {};
+	$(document).ready(function() {
+		$("#calendar").datepicker({
+			numberOfMonths : 1,
+			showButtonPanel : true,
+			stepMonths : 1,
+			changeMonth : true,
+			changeYear : true,
+			beforeShowDay : function(date) {
+				var day = date.getDay();
+				if (day == 6 || day == 0) {
+					return [ true, "ui-datepicker-week-end" ];
+				} else {
+					return [ true, "" ];
+				}
+			},
+			onSelect : function(dateText, inst) {
+			}
+		});
+	});
+</script>
+{% endblock %}
+{% block title %}{{ titulo }}{% endblock %}
+{% block content %}
+	<div id="calendar"></div>
+	<div id="events"></div>
+{% endblock %}

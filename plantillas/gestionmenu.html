@@ -1,0 +1,460 @@
+<html>
+<head>
+<title>{{ titulo }}</title>
+<link type="text/css" rel="stylesheet" href="/static/css/main.css"></link>
+<link rel="stylesheet" href="{{ config.theme }}" type="text/css" />
+<script type="text/javascript"
+	src="https://www.google.com/jsapi?key=ABQIAAAAHgOg6huaKJAv9G24UHf1KBT-_2ssS9ZvfOvr1Ca1c9UJDHLkmhQMLz6VvDl-zLZ9USIlHGHxy3IcGg"></script>
+<script type="text/javascript">
+	google.load("jquery", "1.6.4");
+	google.load("jqueryui", "1.8.16");
+</script>
+<script type="text/javascript" src="/static/js/funciones.js"></script>
+<script type="text/javascript" src="/static/js/clases/pantalla.js"></script>
+<script type="text/javascript">
+	var c = 0;
+	var t;
+	var timer_is_on = 0;
+
+	function consulta() {
+		$.getJSON("/nucleo/admin/menu/cons", function(data) {
+			if (data != null) {
+				$.each(data, function(key, val) {
+					if ($("#col1_" + key).length == 0) {
+						if ($("#col1_" + (key - 1)).length == 0) {
+							newobject($("#trnuevo"), 'D', val);
+						} else {
+							newobject($("#col1_" + (key - 1)).parent("tr"),
+									'D', val);
+						}
+					}
+				});
+			}
+		});
+		t = setTimeout("consulta()", 10000);
+	}
+
+	$(document)
+			.ready(
+					function() {
+						var tabla = $("#tabla").dataTable();
+						$("#padre")
+								.autocomplete(
+										{
+											source : function(request, response) {
+												$
+														.getJSON(
+																"/nucleo/list/padres/",
+																{
+																	input : request.term,
+																	max : 7
+																},
+																function(data) {
+																	response($
+																			.map(
+																					data,
+																					function(
+																							item) {
+																						return {
+																							label : item.nombre,
+																							value : item.id
+																						}
+																					}));
+																});
+											},
+											minLength : 2,
+											select : function(event, ui) {
+												$("#padre").val(ui.item.label);
+												$("#idpadre")
+														.val(ui.item.value);
+												return false;
+											},
+											open : function() {
+												$(this)
+														.removeClass(
+																"ui-corner-all")
+														.addClass(
+																"ui-corner-top");
+											},
+											close : function() {
+												$(this)
+														.removeClass(
+																"ui-corner-top")
+														.addClass(
+																"ui-corner-all");
+											}
+										});
+
+						$(".nuevo").click(function() {
+							if ($("#idudp").length == 0) {
+								resetearFormulario("uno");
+								$(".trnuevo").show();
+							}
+						});
+
+						$("#grabar")
+								.click(
+										function() {
+											var p = obj;
+											p.nombre = $("#nombre").val();
+											p.titulo = $("#titulo").val();
+											p.url = $("#url").val();
+											p.orden = $("#orden").val();
+											p.padre = $("#idpadre").val();
+											p.visible = $("#visible").is(
+													':checked');
+											p.admin = $("#admin")
+													.is(':checked');
+											p.accion = "I";
+											$
+													.post(
+															"/nucleo/admin/menu/",
+															p,
+															function(data) {
+																if (data != null) {
+																	newobject(
+																			$("#trbuttons"),
+																			'A',
+																			data.obj)
+																	resetearFormulario("uno");
+																	$(
+																			".trnuevo")
+																			.hide();
+																}
+															}, "json");
+										});
+
+						$("#cancelar").click(function() {
+							resetearFormulario("uno");
+							$(".trnuevo").hide();
+						});
+
+						$(".tdelemento")
+								.live(
+										"click",
+										function() {
+											if ($("#idudp").length == 0
+													&& !$(".trnuevo").is(
+															":visible")) {
+												var id = $(this).attr("id")
+														.split("_")[1];
+												var padre = "";
+												var p = obj;
+												for ( var i = 1; i <= cols; i++) {
+													if (i == 5) {
+														padre = $(
+																"#col" + i
+																		+ "1_"
+																		+ id)
+																.html();
+														p[i - 1] = $(
+																"#col" + i
+																		+ "2_"
+																		+ id)
+																.val();
+													} else if (i == 6 || i == 7) {
+														p[i - 1] = $(
+																"#col" + i
+																		+ "1_"
+																		+ id)
+																.is(':checked');
+													} else {
+														p[i - 1] = $(
+																"#col" + i
+																		+ "_"
+																		+ id)
+																.html();
+													}
+												}
+												limpiarFila(id);
+												for ( var i = 1; i <= cols; i++) {
+													if (i == 5) {
+														newinput("#col" + i
+																+ "_" + id,
+																"udpcol" + i
+																		+ "1",
+																"text", padre);
+														newinput("#col" + i
+																+ "_" + id,
+																"udpcol" + i
+																		+ "2",
+																"hidden",
+																p[i - 1]);
+														newinput("#col" + i
+																+ "_" + id,
+																"oldcol" + i
+																		+ "1",
+																"hidden", padre);
+														newinput("#col" + i
+																+ "_" + id,
+																"oldcol" + i
+																		+ "2",
+																"hidden",
+																p[i - 1]);
+														lista("udpcol" + i
+																+ "1", "udpcol"
+																+ i + "2",
+																"/nucleo/list/padres/");
+													} else if (i == 6 || i == 7) {
+														newinput("#col" + i
+																+ "_" + id,
+																"udpcol" + i
+																		+ "1",
+																"checkbox",
+																p[i - 1]);
+														newinput("#col" + i
+																+ "_" + id,
+																"oldcol" + i
+																		+ "1",
+																"hidden",
+																p[i - 1]);
+													} else {
+														newinput("#col" + i
+																+ "_" + id,
+																"udpcol" + i,
+																"text",
+																p[i - 1]);
+														newinput("#col" + i
+																+ "_" + id,
+																"oldcol" + i,
+																"hidden",
+																p[i - 1]);
+													}
+												}
+												$("#udpcol4").attr("size", 3)
+												updbottons(
+														$(this).parent("tr"),
+														cols);
+												$("#idudp").val(id);
+											}
+										});
+
+						$("#grabarudp")
+								.live(
+										"click",
+										function() {
+											var padre = "";
+											var id = $("#idudp").val();
+											var p = obj;
+											p.id = id;
+											p.nombre = $("#udpcol1").val();
+											p.titulo = $("#udpcol2").val();
+											p.url = $("#udpcol3").val();
+											p.orden = $("#udpcol4").val();
+											p.padre = $("#udpcol52").val();
+											p.visible = $("#udpcol61").is(
+													':checked');
+											p.admin = $("#udpcol71").is(
+													':checked');
+											p.accion = "A";
+											$
+													.post(
+															"/nucleo/admin/menu/",
+															p,
+															function(data) {
+																limpiarFila(id);
+																$("#col1_" + id)
+																		.html(
+																				data.obj.nombre);
+																$("#col2_" + id)
+																		.html(
+																				data.obj.titulo);
+																$("#col3_" + id)
+																		.html(
+																				data.obj.url);
+																$("#col4_" + id)
+																		.html(
+																				data.obj.orden);
+																$(
+																		"<p id=\"col51_" + id + "\"></p>")
+																		.appendTo(
+																				"#col5_"
+																						+ id);
+																newinput(
+																		"#col5_"
+																				+ id,
+																		"col52_"
+																				+ id,
+																		"hidden",
+																		"");
+																if (data.obj.padre != null
+																		&& data.obj.padre != "") {
+																	$(
+																			"#col51_"
+																					+ id)
+																			.html(
+																					data.obj.padre.nombre);
+																	$(
+																			"#col52_"
+																					+ id)
+																			.val(
+																					data.obj.padre.id);
+																}
+																newinput(
+																		"#col6_"
+																				+ id,
+																		"col61_"
+																				+ id,
+																		"checkbox",
+																		data.obj.visible);
+																newinput(
+																		"#col7_"
+																				+ id,
+																		"col71_"
+																				+ id,
+																		"checkbox",
+																		data.obj.admin);
+																$(".trudp")
+																		.remove();
+															}, "json");
+										});
+
+						$("#cancelarudp").live(
+								"click",
+								function() {
+									var id = $("#idudp").val();
+									var p = obj;
+									var padre = "";
+									for ( var i = 1; i <= cols; i++) {
+										if (i == 5) {
+											padre = $("#oldcol" + i + "1")
+													.val();
+											p[i - 1] = $("#oldcol" + i + "2")
+													.val();
+										} else if (i == 6 || i == 7) {
+											p[i - 1] = $("#oldcol" + i + "1")
+													.val() == "true" ? true
+													: false;
+										} else {
+											p[i - 1] = $("#oldcol" + i).val();
+										}
+									}
+									limpiarFila(id);
+									for ( var i = 1; i <= cols; i++) {
+										if (i == 5) {
+											$(
+													"<p id=\"col" + i + "1_" + id + "\">"
+															+ padre + "</p>")
+													.appendTo(
+															"#col" + i + "_"
+																	+ id);
+											newinput("#col" + i + "_" + id,
+													"col" + i + "2_" + id,
+													"hidden", p[i - 1]);
+										} else if (i == 6 || i == 7) {
+											newinput("#col" + i + "_" + id,
+													"col" + i + "1_" + id,
+													"checkbox", p[i - 1]);
+											$("#col" + i + "1_" + id).addClass(
+													"inhabilitado");
+										} else {
+											$("#col" + i + "_" + id).html(
+													p[i - 1]);
+										}
+									}
+									$(".trudp").remove();
+								});
+
+						$("input").live("click", function() {
+							//return false;
+						});
+
+						$(".inhabilitado").live("click", function() {
+							return false;
+						});
+
+						//doTimer();
+					});
+</script>
+</head>
+<body>
+	<table class="tablaMsj">
+		<tr id="inicio">
+			<td align="right"><a id="volver" class="volver"
+				href="{{ volver.url }}">{{ volver.nombre }}</a>&nbsp;<a id="alogin"
+				class="logout" href="{{ url }}">{{ url_linktext }}</a></td>
+		</tr>
+	</table>
+	<form action="#" id="uno">
+		<table style="width: 100%" id="tabla">
+			<tr>
+				<td align="center">
+					<table class="ppal" style="vertical-align: middle; left: 50px;">
+						<caption>{{ titulo }}</caption>
+						<tr id="cabecera">
+							<td align="center">Nombre</td>
+							<td align="center">T&iacute;tulo</td>
+							<td align="center">URL</td>
+							<td align="center">Orden</td>
+							<td align="center">Padre</td>
+							<td align="center">Visible</td>
+							<td align="center">Administraci&oacute;n</td>
+						</tr>
+						<tr class="trnuevo" style="display: none;">
+							<td><input name="nombre" id="nombre" type="text"
+								style="width: 100%"></td>
+							<td><input name="titulo" id="titulo" type="text"
+								style="width: 100%"></td>
+							<td><input name="url" id="url" type="text"
+								style="width: 100%"></td>
+							<td><input name="orden" id="orden" type="text" size="4"></td>
+							<td><input name="padre" id="padre" type="text"
+								style="width: 100%"><input name="idpadre" id="idpadre"
+								type="hidden"></td>
+							<td><input name="visible" id="visible" type="checkbox"
+								value="true"></td>
+							<td><input name="admin" id="admin" type="checkbox"
+								value="true"></td>
+						</tr>
+						<tr id="trnuevo" class="trnuevo" style="display: none;">
+							<td align="right" colspan="{{ cols }}"><a href="#"
+								id="grabar" class="grabar">Grabar</a>&nbsp;<a href="#"
+								id="cancelar" class="cancelar">Cancelar</a> <input name="id"
+								type="hidden" id="id"></td>
+						</tr>
+						{% if arr %} {% for obj in arr %}
+						<tr class="fila">
+							<td class="tdelemento" id="col1_{{ obj.id }}">{{ obj.nombre }}</td>
+							<td class="tdelemento" id="col2_{{ obj.id }}">{{ obj.titulo }}</td>
+							<td class="tdelemento" id="col3_{{ obj.id }}">{{ obj.url }}</td>
+							<td class="tdelemento" id="col4_{{ obj.id }}">{{ obj.orden }}</td> {% if obj.padre %}
+							<td class="tdelemento" id="col5_{{ obj.id }}"><p
+									id="col51_{{ obj.id }}">{{ obj.padre.nombre }}</p>
+								<input name="idpadre_{{ obj.id }}" id="col52_{{ obj.id }}"
+								type="hidden" value="{{ obj.padre.id }}"></td> {% else %}
+							<td class="tdelemento" id="col5_{{ obj.id }}"><p
+									id="col51_{{ obj.id }}"></p>
+								<input name="col52_{{ obj.id }}" id="col52_{{ obj.id }}"
+								type="hidden" value=""></td> {% endif %} {% if obj.visible %}
+							<td class="tdelemento" id="col6_{{ obj.id }}"><input
+								type="checkbox" id="col61_{{ obj.id }}"
+								name="visible_{{ obj.id }}" checked="checked"
+								class="inhabilitado"></td> {% else %}
+							<td class="tdelemento" id="col6_{{ obj.id }}"><input
+								type="checkbox" id="col61_{{ obj.id }}"
+								name="visible_{{ obj.id }}" class="inhabilitado"></td> {% endif %} {% if obj.admin %}
+							<td class="tdelemento" id="col7_{{ obj.id }}"><input
+								type="checkbox" id="col71_{{ obj.id }}"
+								name="visible_{{ obj.id }}" checked="checked"
+								class="inhabilitado"></td> {% else %}
+							<td class="tdelemento" id="col7_{{ obj.id }}"><input
+								type="checkbox" id="col71_{{ obj.id }}"
+								name="visible_{{ obj.id }}" class="inhabilitado"></td> {% endif %}
+						</tr>
+						{% endfor %} {% else %}
+						<tr>
+							<td align="center" colspan="{{ cols }}" align="center">No
+								hay elementos</td>
+						</tr>
+						{% endif %}
+						<tr id="trbuttons">
+							<td colspan="{{ cols }}" align="right"><a href="#"
+								class="nuevo">Nuevo</a></td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+	</form>
+</body>
+</html>
